@@ -1,7 +1,6 @@
-# This .gitignore file should be placed at the root of your Unity project directory
-#
-# Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
-#
+# Unity - Estándar (https://github.com/github/gitignore/blob/main/Unity.gitignore)
+# Ignora también estas carpetas en subcarpetas (proyecto Unity anidado)
+
 .utmp/
 /[Ll]ibrary/
 /[Tt]emp/
@@ -11,6 +10,15 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 *.log
+
+# Mismo contenido en cualquier nivel del árbol (proyecto en subcarpeta)
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
 
 # By default unity supports Blender asset imports, *.blend1 blender files do not need to be commited to version control.
 *.blend1
