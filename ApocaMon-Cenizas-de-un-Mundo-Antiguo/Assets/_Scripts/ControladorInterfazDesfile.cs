@@ -1,32 +1,36 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 /// <summary>
-/// Conecta la UI del desfile con ManejadorDesfile: pool de tipos (oleada) de tamaño N = cantidadTiposOleada,
-/// sorteo solo sobre esos N, cantidadAMostrar botones. La elección se guarda en el asset asignado en ManejadorDesfile.
+/// Sistema modular del Desfile: pool fijo de 10 tipos → Oleada Prima (6 al azar) → 3 botones al azar.
+/// Color y uso del visual se aplican al objeto asignado en visualApocaMon (p. ej. el hijo triángulo).
 /// </summary>
 public class ControladorInterfazDesfile : MonoBehaviour
 {
+    private const int TamanioPool = 10;
+    private const int CantidadOleadaPrima = 6;
+    private const int CantidadBotonesMostrar = 3;
+
     [Header("Conexiones")]
     [SerializeField] private ManejadorDesfile manejadorDesfile;
+    [Tooltip("SpriteRenderer del objeto hijo (triángulo/visual). Aquí se aplica el color según el tipo.")]
     [SerializeField] private SpriteRenderer visualApocaMon;
-    [Tooltip("Botones donde se muestran los tipos (orden 0, 1, 2, ...). Los que sobren se desactivan.")]
+    [Tooltip("Los 5 botones. Se activan 3 con los tipos sorteados; los otros 2 se desactivan.")]
     [SerializeField] private Button[] botones;
+    [Tooltip("Panel que contiene los botones de tipos. Se desactiva al elegir uno.")]
+    [SerializeField] private GameObject panelBotones;
+    [Tooltip("Botón CONTINUAR (oculto al inicio). Se muestra al elegir un tipo.")]
+    [SerializeField] private GameObject botonContinuar;
 
-    [Header("Cantidades")]
-    [Tooltip("Tamaño del pool de la oleada (p. ej. 6). El array poolTipos debe tener exactamente este tamaño.")]
-    [SerializeField] private int cantidadTiposOleada = 6;
-    [Tooltip("Cuántas opciones mostrar al jugador (p. ej. 3 botones). Debe ser <= cantidadTiposOleada.")]
-    [SerializeField] private int cantidadAMostrar = 3;
-
-    [Header("Pool de tipos (tamaño = cantidadTiposOleada)")]
-    [Tooltip("Solo se usa este pool para el sorteo. Tamaño controlado por cantidadTiposOleada en el Editor.")]
-    [SerializeField] private TipoConNombreYColor[] poolTipos;
+    [Header("Pool de 10 tipos (fijo)")]
+    [SerializeField] private TipoConNombreYColor[] poolTipos = new TipoConNombreYColor[TamanioPool];
 
     private TipoApocaMon[] opcionesActuales = new TipoApocaMon[0];
     private Color colorOriginal;
+    private TipoApocaMon tipoElegido;
 
     [System.Serializable]
     public struct TipoConNombreYColor
@@ -44,33 +48,25 @@ public class ControladorInterfazDesfile : MonoBehaviour
 
     private void Start()
     {
-        int tamPool = poolTipos != null ? poolTipos.Length : 0;
-        Debug.Log("Sorteo iniciado con " + tamPool + " tipos");
-
-        if (manejadorDesfile == null || botones == null || botones.Length == 0)
+        if (poolTipos == null || poolTipos.Length < TamanioPool)
         {
-            Debug.LogWarning("ControladorInterfazDesfile: asigna ManejadorDesfile y el array de botones.");
+            Debug.LogWarning("ControladorInterfazDesfile: el pool debe tener 10 elementos.");
             return;
         }
-        if (tamPool == 0)
+        if (manejadorDesfile == null || botones == null || botones.Length < CantidadBotonesMostrar)
         {
-            Debug.LogWarning("ControladorInterfazDesfile: el pool está vacío. Cargá al menos un tipo.");
-            return;
-        }
-        if (cantidadAMostrar <= 0 || cantidadAMostrar > tamPool)
-        {
-            Debug.LogWarning("ControladorInterfazDesfile: cantidadAMostrar debe ser positiva y <= cantidad de tipos en el pool (" + tamPool + ").");
+            Debug.LogWarning("ControladorInterfazDesfile: asigna ManejadorDesfile y al menos 3 botones.");
             return;
         }
 
-        // Oleada = los tipos que hay en el pool (usa todo lo que encuentre)
-        TipoApocaMon[] oleada = new TipoApocaMon[tamPool];
-        for (int i = 0; i < tamPool; i++)
-            oleada[i] = poolTipos[i].tipo;
+        // Oleada Prima: 6 tipos al azar de los 10 del pool (sin repetir)
+        TipoApocaMon[] oleadaPrima = ElegirAlAzarDePool(CantidadOleadaPrima);
 
-        manejadorDesfile.ConfigurarOpcionesDesdeOleada(oleada, cantidadAMostrar);
+        // De esos 6, elegir 3 para los botones
+        manejadorDesfile.ConfigurarOpcionesDesdeOleada(oleadaPrima, CantidadBotonesMostrar);
         opcionesActuales = manejadorDesfile.ObtenerOpcionesActuales();
 
+        // UI: activar 3 botones con nombre y color; desactivar los sobrantes
         for (int i = 0; i < botones.Length; i++)
         {
             if (botones[i] == null) continue;
@@ -103,6 +99,33 @@ public class ControladorInterfazDesfile : MonoBehaviour
                 botones[i].gameObject.SetActive(false);
             }
         }
+
+        if (botonContinuar != null)
+            botonContinuar.SetActive(false);
+    }
+
+    /// <summary>
+    /// Elige 'cantidad' tipos al azar del pool de 10, sin repetir.
+    /// </summary>
+    private TipoApocaMon[] ElegirAlAzarDePool(int cantidad)
+    {
+        int n = Mathf.Min(cantidad, poolTipos.Length);
+        int[] indices = new int[poolTipos.Length];
+        for (int i = 0; i < indices.Length; i++)
+            indices[i] = i;
+
+        for (int i = indices.Length - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            int t = indices[i];
+            indices[i] = indices[j];
+            indices[j] = t;
+        }
+
+        TipoApocaMon[] resultado = new TipoApocaMon[n];
+        for (int i = 0; i < n; i++)
+            resultado[i] = poolTipos[indices[i]].tipo;
+        return resultado;
     }
 
     private string NombreParaTipo(TipoApocaMon t)
@@ -123,6 +146,9 @@ public class ControladorInterfazDesfile : MonoBehaviour
         return Color.white;
     }
 
+    /// <summary>
+    /// Aplica color al visual asignado (objeto hijo en visualApocaMon).
+    /// </summary>
     private void AplicarColorVisual(Color c)
     {
         if (visualApocaMon != null)
@@ -143,8 +169,23 @@ public class ControladorInterfazDesfile : MonoBehaviour
     public void OnBotonClic(int indice)
     {
         if (manejadorDesfile == null || indice < 0 || indice >= opcionesActuales.Length) return;
+        tipoElegido = opcionesActuales[indice];
         AplicarColorVisual(ColorParaTipo(opcionesActuales[indice]));
         manejadorDesfile.SeleccionarTipo(indice);
+
+        if (panelBotones != null)
+            panelBotones.SetActive(false);
+        if (botonContinuar != null)
+            botonContinuar.SetActive(true);
+    }
+
+    /// <summary>
+    /// Carga la escena de combate. Asignar al botón CONTINUAR.
+    /// </summary>
+    public void CargarBatalla()
+    {
+        Debug.Log("Cargando batalla con el tipo: " + tipoElegido);
+        SceneManager.LoadScene("03_Batalla");
     }
 
     public void OnBotonClic0() => OnBotonClic(0);
