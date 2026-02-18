@@ -1,42 +1,62 @@
 using UnityEngine;
 using UnityEditor;
-using NavMesh2D = NavMeshPlus.Components;
+using UnityEngine.AI;
+using NavMeshPlus.Components;
 
 public class NavMeshFixer : EditorWindow
 {
-    [MenuItem("ApocaMon Tools/Reparar NavMesh 2D")]
-    public static void FixNavMesh()
+    [MenuItem("ApocaMon Tools/🔥 REPARAR TODO (Z, Cámara y Capas)")]
+    public static void FixEverything()
     {
-        // 1. Configurar SUELO
-        GameObject suelo = GameObject.Find("Suelo");
-        if (suelo != null)
-        {
-            var col = suelo.GetComponent<BoxCollider>();
-            if (col == null) col = suelo.AddComponent<BoxCollider>();
-            col.size = new Vector3(col.size.x, col.size.y, 20f);
+        Debug.Log("🚀 Iniciando Reparación Total 3.2.3...");
 
-            var mod = suelo.GetComponent<NavMesh2D.NavMeshModifier>();
-            if (mod == null) mod = suelo.AddComponent<NavMesh2D.NavMeshModifier>();
-            mod.overrideArea = true;
-            mod.area = 0;
-            Debug.Log("✅ Suelo listo.");
+        // 1. Reset de Cámara
+        GameObject cam = GameObject.Find("Main Camera");
+        if (cam != null)
+        {
+            Undo.RecordObject(cam.transform, "Fix Camera");
+            cam.transform.position = new Vector3(0f, 0f, -10f); // Posición estándar 2D
+            Debug.Log("🎥 Cámara reseteada a Z = -10");
         }
 
-        // 2. Configurar NAVMESH_SYSTEM
-        GameObject system = GameObject.Find("NavMesh_System");
-        if (system == null) system = new GameObject("NavMesh_System");
-        system.transform.rotation = Quaternion.Euler(-90, 0, 0);
+        // 2. Aplastar objetos a Z=0 y configurar capas
+        FixObject("Suelo", 0, -10);          // Fondo
+        FixObject("Meta", 0, 1);             // Encima del suelo
+        FixObject("Spawner_Enemigos", 0, 5); // Encima de todo
 
-        var surface = system.GetComponent<NavMesh2D.NavMeshSurface>();
-        if (surface == null) surface = system.AddComponent<NavMesh2D.NavMeshSurface>();
+        // 3. Sistema de NavMesh
+        GameObject sistema = GameObject.Find("NavMesh_System");
+        if (sistema != null)
+        {
+            Undo.RecordObject(sistema.transform, "Fix NavMesh System");
+            sistema.transform.position = new Vector3(sistema.transform.position.x, sistema.transform.position.y, 0f);
 
-        // CORRECCIÓN AQUÍ: Usamos la referencia universal de Unity para la geometría
-        surface.useGeometry = UnityEngine.AI.NavMeshCollectGeometry.PhysicsColliders;
-        surface.collectObjects = NavMesh2D.CollectObjects.All;
-        surface.agentTypeID = -1314334417;
+            NavMeshSurface surface = sistema.GetComponent<NavMeshSurface>();
+            if (surface != null)
+            {
+                Debug.Log("⚙️ Horneando NavMesh...");
+                surface.BuildNavMesh();
+            }
+        }
 
-        // 3. BAKE
-        surface.BuildNavMesh();
-        Debug.Log("🚀 ¡Bake exitoso! El piso debería estar azul.");
+        Debug.Log("✅ ¡PROCESO COMPLETADO! Dale al Play.");
+    }
+
+    private static void FixObject(string nombre, float zPos, int sortingOrder)
+    {
+        GameObject obj = GameObject.Find(nombre);
+        if (obj != null)
+        {
+            Undo.RecordObject(obj.transform, "Fix Position");
+            obj.transform.position = new Vector3(obj.transform.position.x, obj.transform.position.y, zPos);
+
+            SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
+            if (renderer != null)
+            {
+                Undo.RecordObject(renderer, "Fix Sorting");
+                renderer.sortingOrder = sortingOrder;
+            }
+            Debug.Log($"✅ {nombre}: Z={zPos}, Order={sortingOrder}");
+        }
     }
 }

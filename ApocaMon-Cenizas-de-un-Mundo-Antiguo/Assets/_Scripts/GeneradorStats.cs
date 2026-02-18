@@ -14,7 +14,7 @@ public enum StatClasificacion
 
 /// <summary>
 /// Genera estadísticas base tirando D6 por estadística. Permite hasta 3 intentos (1 inicial + 2 re-rolls) por stat.
-/// No modifica tipoPrincipal (queda Desconocido hasta que el jugador elija en el siguiente paso).
+/// No modifica clanPrincipal (queda Desconocido hasta que el jugador elija en el siguiente paso).
 /// </summary>
 public class GeneradorStats : MonoBehaviour
 {
@@ -36,7 +36,7 @@ public class GeneradorStats : MonoBehaviour
 
     /// <summary>
     /// Tira un D6 por cada una de las 5 estadísticas. VidaMax, defensa, resistenciaMax y alcance reciben el valor directo del dado (1-6).
-    /// VelocidadAtaque se traduce a rangos de tiempo. Deja 2 re-rolls por estadística. No modifica tipoPrincipal.
+    /// VelocidadAtaque se traduce a rangos de tiempo. Deja 2 re-rolls por estadística. No modifica clanPrincipal.
     /// </summary>
     public void TirarDados()
     {

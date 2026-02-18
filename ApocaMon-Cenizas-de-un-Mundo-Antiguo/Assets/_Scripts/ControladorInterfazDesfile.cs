@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 using TMPro;
 
 /// <summary>
-/// Sistema modular del Desfile: pool fijo de 10 tipos → Oleada Prima (6 al azar) → 3 botones al azar.
+/// Sistema modular del Desfile: pool fijo de 10 clanes → Oleada Prima (6 al azar) → 3 botones al azar.
 /// Color y uso del visual se aplican al objeto asignado en visualApocaMon (p. ej. el hijo triángulo).
 /// </summary>
 public class ControladorInterfazDesfile : MonoBehaviour
@@ -16,26 +16,26 @@ public class ControladorInterfazDesfile : MonoBehaviour
 
     [Header("Conexiones")]
     [SerializeField] private ManejadorDesfile manejadorDesfile;
-    [Tooltip("SpriteRenderer del objeto hijo (triángulo/visual). Aquí se aplica el color según el tipo.")]
+    [Tooltip("SpriteRenderer del objeto hijo (triángulo/visual). Aquí se aplica el color según el clan.")]
     [SerializeField] private SpriteRenderer visualApocaMon;
-    [Tooltip("Los 5 botones. Se activan 3 con los tipos sorteados; los otros 2 se desactivan.")]
+    [Tooltip("Los 5 botones. Se activan 3 con los clanes sorteados; los otros 2 se desactivan.")]
     [SerializeField] private Button[] botones;
-    [Tooltip("Panel que contiene los botones de tipos. Se desactiva al elegir uno.")]
+    [Tooltip("Panel que contiene los botones de clanes. Se desactiva al elegir uno.")]
     [SerializeField] private GameObject panelBotones;
-    [Tooltip("Botón CONTINUAR (oculto al inicio). Se muestra al elegir un tipo.")]
+    [Tooltip("Botón CONTINUAR (oculto al inicio). Se muestra al elegir un clan.")]
     [SerializeField] private GameObject botonContinuar;
 
-    [Header("Pool de 10 tipos (fijo)")]
-    [SerializeField] private TipoConNombreYColor[] poolTipos = new TipoConNombreYColor[TamanioPool];
+    [Header("Pool de 10 clanes (fijo)")]
+    [SerializeField] private ClanConNombreYColor[] poolClanes = new ClanConNombreYColor[TamanioPool];
 
-    private TipoApocaMon[] opcionesActuales = new TipoApocaMon[0];
+    private ClanApocaMon[] opcionesActuales = new ClanApocaMon[0];
     private Color colorOriginal;
-    private TipoApocaMon tipoElegido;
+    private ClanApocaMon clanElegido;
 
     [System.Serializable]
-    public struct TipoConNombreYColor
+    public struct ClanConNombreYColor
     {
-        public TipoApocaMon tipo;
+        public ClanApocaMon clan;
         public string nombreParaBoton;
         public Color colorVisual;
     }
@@ -48,9 +48,9 @@ public class ControladorInterfazDesfile : MonoBehaviour
 
     private void Start()
     {
-        if (poolTipos == null || poolTipos.Length < TamanioPool)
+        if (poolClanes == null || poolClanes.Length < TamanioPool)
         {
-            Debug.LogWarning("ControladorInterfazDesfile: el pool debe tener 10 elementos.");
+            Debug.LogWarning("ControladorInterfazDesfile: el pool de clanes debe tener 10 elementos.");
             return;
         }
         if (manejadorDesfile == null || botones == null || botones.Length < CantidadBotonesMostrar)
@@ -59,8 +59,8 @@ public class ControladorInterfazDesfile : MonoBehaviour
             return;
         }
 
-        // Oleada Prima: 6 tipos al azar de los 10 del pool (sin repetir)
-        TipoApocaMon[] oleadaPrima = ElegirAlAzarDePool(CantidadOleadaPrima);
+        // Oleada Prima: 6 clanes al azar de los 10 del pool (sin repetir)
+        ClanApocaMon[] oleadaPrima = ElegirAlAzarDePool(CantidadOleadaPrima);
 
         // De esos 6, elegir 3 para los botones
         manejadorDesfile.ConfigurarOpcionesDesdeOleada(oleadaPrima, CantidadBotonesMostrar);
@@ -73,7 +73,7 @@ public class ControladorInterfazDesfile : MonoBehaviour
 
             if (i < opcionesActuales.Length)
             {
-                string nombre = NombreParaTipo(opcionesActuales[i]);
+                string nombre = NombreParaClan(opcionesActuales[i]);
                 TMP_Text texto = botones[i].GetComponentInChildren<TMP_Text>(true);
                 if (texto != null)
                     texto.text = nombre;
@@ -105,12 +105,12 @@ public class ControladorInterfazDesfile : MonoBehaviour
     }
 
     /// <summary>
-    /// Elige 'cantidad' tipos al azar del pool de 10, sin repetir.
+    /// Elige 'cantidad' clanes al azar del pool de 10, sin repetir.
     /// </summary>
-    private TipoApocaMon[] ElegirAlAzarDePool(int cantidad)
+    private ClanApocaMon[] ElegirAlAzarDePool(int cantidad)
     {
-        int n = Mathf.Min(cantidad, poolTipos.Length);
-        int[] indices = new int[poolTipos.Length];
+        int n = Mathf.Min(cantidad, poolClanes.Length);
+        int[] indices = new int[poolClanes.Length];
         for (int i = 0; i < indices.Length; i++)
             indices[i] = i;
 
@@ -122,27 +122,27 @@ public class ControladorInterfazDesfile : MonoBehaviour
             indices[j] = t;
         }
 
-        TipoApocaMon[] resultado = new TipoApocaMon[n];
+        ClanApocaMon[] resultado = new ClanApocaMon[n];
         for (int i = 0; i < n; i++)
-            resultado[i] = poolTipos[indices[i]].tipo;
+            resultado[i] = poolClanes[indices[i]].clan;
         return resultado;
     }
 
-    private string NombreParaTipo(TipoApocaMon t)
+    private string NombreParaClan(ClanApocaMon c)
     {
-        if (poolTipos == null) return t.ToString();
-        for (int i = 0; i < poolTipos.Length; i++)
-            if (poolTipos[i].tipo == t)
-                return poolTipos[i].nombreParaBoton;
-        return t.ToString();
+        if (poolClanes == null) return c.ToString();
+        for (int i = 0; i < poolClanes.Length; i++)
+            if (poolClanes[i].clan == c)
+                return poolClanes[i].nombreParaBoton;
+        return c.ToString();
     }
 
-    private Color ColorParaTipo(TipoApocaMon t)
+    private Color ColorParaClan(ClanApocaMon c)
     {
-        if (poolTipos == null) return Color.white;
-        for (int i = 0; i < poolTipos.Length; i++)
-            if (poolTipos[i].tipo == t)
-                return poolTipos[i].colorVisual;
+        if (poolClanes == null) return Color.white;
+        for (int i = 0; i < poolClanes.Length; i++)
+            if (poolClanes[i].clan == c)
+                return poolClanes[i].colorVisual;
         return Color.white;
     }
 
@@ -158,7 +158,7 @@ public class ControladorInterfazDesfile : MonoBehaviour
     public void OnHoverEntrar(int indice)
     {
         if (indice < 0 || indice >= opcionesActuales.Length) return;
-        AplicarColorVisual(ColorParaTipo(opcionesActuales[indice]));
+        AplicarColorVisual(ColorParaClan(opcionesActuales[indice]));
     }
 
     public void OnHoverSalir()
@@ -169,9 +169,9 @@ public class ControladorInterfazDesfile : MonoBehaviour
     public void OnBotonClic(int indice)
     {
         if (manejadorDesfile == null || indice < 0 || indice >= opcionesActuales.Length) return;
-        tipoElegido = opcionesActuales[indice];
-        AplicarColorVisual(ColorParaTipo(opcionesActuales[indice]));
-        manejadorDesfile.SeleccionarTipo(indice);
+        clanElegido = opcionesActuales[indice];
+        AplicarColorVisual(ColorParaClan(opcionesActuales[indice]));
+        manejadorDesfile.SeleccionarClan(indice);
 
         if (panelBotones != null)
             panelBotones.SetActive(false);
@@ -184,7 +184,7 @@ public class ControladorInterfazDesfile : MonoBehaviour
     /// </summary>
     public void CargarBatalla()
     {
-        Debug.Log("Cargando batalla con el tipo: " + tipoElegido);
+        Debug.Log("Cargando batalla con el clan: " + clanElegido);
         SceneManager.LoadScene("03_Batalla");
     }
 

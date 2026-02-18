@@ -1,29 +1,29 @@
 using UnityEngine;
 
 /// <summary>
-/// Tipos oficiales de ApocaMon (elemento/afinidad). 19 tipos del diseño final.
+/// Clanes oficiales de ApocaMon (elemento/afinidad). Lista por ID: 0 Desconocido, 1 Océano, 2 Radiactivo, 3 Tóxico, 4 Mutavegetal, 5 Voltaje, 6 Gélido, 7 Impacto, 8 Ceniza, 9 Aéreo, 10 Psíquicos, 11 Plaga, 12 Roca, 13 Espectro, 14 Draco, 15 Siniestro, 16 Acero, 17 Espejismo, 18 Infierno.
 /// </summary>
-public enum TipoApocaMon
+public enum ClanApocaMon
 {
-    Desconocido,
-    Oasis,
-    Radiactivo,
-    Toxico,
-    Mutavegetal,
-    Voltaje,
-    Criogenico,
-    Gladiador,
-    Erosion,
-    Vigia,
-    Eco,
-    Plaga,
-    Escombro,
-    Anomalia,
-    Leviatan,
-    Carroñero,
-    Blindado,
-    Espejismo,
-    Incinerador
+    Desconocido,   // 0
+    Oceano,        // 1 (Océano)
+    Radiactivo,    // 2
+    Toxico,        // 3 (Tóxico)
+    Mutavegetal,   // 4
+    Voltaje,       // 5
+    Gelido,        // 6 (Gélido)
+    Impacto,       // 7
+    Ceniza,        // 8
+    Aereo,         // 9 (Aéreo)
+    Psiquicos,     // 10 (Psíquicos)
+    Plaga,         // 11
+    Roca,          // 12
+    Espectro,      // 13
+    Draco,         // 14
+    Siniestro,     // 15
+    Acero,         // 16
+    Espejismo,     // 17
+    Infierno       // 18
 }
 
 /// <summary>
@@ -97,10 +97,10 @@ public class DatosApocaMon : ScriptableObject
 
     #endregion
 
-    #region Tipos
+    #region Clanes
 
-    [Tooltip("Tipo principal del ApocaMon (elemento/afinidad)")]
-    public TipoApocaMon tipoPrincipal;
+    [Tooltip("Clan principal del ApocaMon (elemento/afinidad)")]
+    public ClanApocaMon clanPrincipal;
 
     [Tooltip("Rango/clasificación de potencial (tras dados)")]
     public RankedGriego ranked;
