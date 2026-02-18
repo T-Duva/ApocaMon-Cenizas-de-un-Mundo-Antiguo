@@ -3,8 +3,8 @@ using UnityEngine.AI;
 
 /// <summary>
 /// Spawner modular de enemigos para la Escena 03 (batalla). Instancia el prefab y le asigna destino a la Meta.
-/// El color del enemigo lo decide el script interno del prefab (p. ej. según zona), misma lógica de colores que el desfile pero en el prefab.
-/// Requiere: paquete AI Navigation. Bake NavMesh en la escena para que esquivén obstáculos.
+/// Configurado para 2D (XY): agentes no rotan ni cambian el eje para mantenerse en el plano.
+/// Requiere: NavMeshPlus (bake en XY) o AI Navigation. Ver NAVMESH_2D_SETUP.md para bake en plano XY.
 /// </summary>
 public class GeneradorEnemigos : MonoBehaviour
 {
@@ -37,6 +37,8 @@ public class GeneradorEnemigos : MonoBehaviour
         if (agent == null)
             agent = enemigo.AddComponent<NavMeshAgent>();
         agent.enabled = true;
+        agent.updateRotation = false;
+        agent.updateUpAxis = false;
         agent.SetDestination(meta.position);
 
         return enemigo;
