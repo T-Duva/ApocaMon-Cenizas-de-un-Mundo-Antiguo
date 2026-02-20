@@ -32,7 +32,12 @@ public class IAEnemigo : MonoBehaviour
             transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
         }
 
-        // Log para confirmar que ahora sí estamos en 0
-        Debug.Log($"Corrigiendo Z. Posición actual: {transform.position}");
+        // Ajuste de capa dinámico: cuanto más abajo está (Y menor), más adelante se dibuja
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            // Usamos -Y multiplicado por 100 para tener un margen de capas
+            sr.sortingOrder = Mathf.RoundToInt(-transform.position.y * 100);
+        }
     }
 }
