@@ -1,51 +1,62 @@
 using UnityEngine;
+using UnityEngine.AI;
 using System.Collections;
-using System.Collections.Generic;
 
 public class WaveManager : MonoBehaviour
 {
-    [Header("Configuración de Oleada")]
+    [Header("--- REFERENCIAS ---")]
     public GameObject enemigoPrefab;
     public Transform spawnerTransform;
-    public int cantidadPorOleada = 10;
-    public float tiempoEntreEnemigos = 1.0f; // <--- Acá controlás la cadencia
-    public float tiempoEntreOleadas = 5.0f;
 
-    private int oleadaActual = 0;
-    private bool spawnando = false;
+    [Header("--- AJUSTES MODULARES ---")]
+    public int cantidadPorOleada = 10;
+    public float cadenciaSpawn = 1.0f;
+    public float radioDeBusqueda = 20f;
 
     void Start()
     {
-        // Al empezar, esperamos un poco y lanzamos la primera oleada
-        StartCoroutine(SpawnWave());
+        if (spawnerTransform == null) Debug.LogError("❌ LOG: SpawnerTransform no asignado en _GameManager.");
+        StartCoroutine(SpawnSequence());
     }
 
-    IEnumerator SpawnWave()
+    IEnumerator SpawnSequence()
     {
-        spawnando = true;
-        oleadaActual++;
-        Debug.Log($"🔥 Iniciando Oleada {oleadaActual}");
-
-        for (int i = 0; i < cantidadPorOleada; i++)
+        while (true)
         {
-            SpawnEnemigo();
-            yield return new WaitForSeconds(tiempoEntreEnemigos);
+            for (int i = 0; i < cantidadPorOleada; i++)
+            {
+                SpawnIndividual();
+                yield return new WaitForSeconds(cadenciaSpawn);
+            }
+            yield return new WaitForSeconds(5f);
         }
-
-        spawnando = false;
-        Debug.Log($"✅ Oleada {oleadaActual} completada. Próxima en {tiempoEntreOleadas}s");
-        
-        yield return new WaitForSeconds(tiempoEntreOleadas);
-        StartCoroutine(SpawnWave()); // Bucle de oleadas infinitas para testear
     }
 
-    void SpawnEnemigo()
+    void SpawnIndividual()
     {
-        if (enemigoPrefab != null && spawnerTransform != null)
+        if (enemigoPrefab == null) return;
+
+        // 1. Instanciamos el bicho
+        GameObject go = Instantiate(enemigoPrefab, spawnerTransform.position, Quaternion.identity);
+        NavMeshAgent agent = go.GetComponent<NavMeshAgent>();
+
+        if (agent != null)
         {
-            GameObject nuevo = Instantiate(enemigoPrefab, spawnerTransform.position, Quaternion.identity);
-            // Aseguramos que el bicho nazca en Z=0 y con prioridad visual
-            nuevo.transform.position = new Vector3(nuevo.transform.position.x, nuevo.transform.position.y, 0f);
+            agent.enabled = false; // Lo apagamos un segundo para moverlo
+
+            NavMeshHit hit;
+            // Buscamos el punto azul más cercano (radio: radioDeBusqueda)
+            if (NavMesh.SamplePosition(spawnerTransform.position, out hit, radioDeBusqueda, NavMesh.AllAreas))
+            {
+                go.transform.position = hit.position;
+                agent.enabled = true; // Lo prendemos ya en el suelo
+                bool success = agent.Warp(hit.position); // Forzamos el anclaje
+                Debug.Log($"<color=cyan>📦 LOG: Enemigo posicionado. Warp: {success}</color>");
+            }
+            else
+            {
+                Debug.LogError("❌ LOG: No se encontró NavMesh cerca del Spawner.");
+            }
         }
     }
 }
