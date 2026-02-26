@@ -44,20 +44,20 @@ public enum TipoChatarra
 }
 
 /// <summary>
-/// Niveles de rango en escala griega (clasificación de potencial tras dados).
+/// Jerarquía de poder: 10=Omega, 9=Alpha, 8=Beta, 1-7=resto (Iota a Gamma).
 /// </summary>
 public enum RankedGriego
 {
-    Alpha,
-    Beta,
-    Gamma,
-    Delta,
-    Epsilon,
-    Zeta,
-    Eta,
-    Theta,
-    Iota,
-    Omega
+    Iota = 1,
+    Theta = 2,
+    Eta = 3,
+    Zeta = 4,
+    Epsilon = 5,
+    Delta = 6,
+    Gamma = 7,
+    Beta = 8,
+    Alpha = 9,
+    Omega = 10
 }
 
 /// <summary>

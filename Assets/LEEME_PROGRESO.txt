@@ -1,0 +1,12 @@
+ESTADO DEL PROYECTO - CLASIFICACIÓN 3.2.7
+
+Cámara: Zoom automático (90° Ortho / 30° Persp). Posición inicial (0, 50, 0).
+
+Base de Datos: 180 ApocaData generados en Assets/ApocaDataFiles/.
+
+Regla de Oro Ranks: 10=Omega, 9=Alpha, 8=Beta.
+
+Pendiente Próxima Sesión:
+    - Test de profundidad con objeto 3D.
+    - Asignación de ADN al ApocaMotor en escena.
+    - NavMeshObstacle en el jugador (Test de la Hormiga).

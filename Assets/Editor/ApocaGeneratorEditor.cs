@@ -83,7 +83,7 @@ public static class ApocaGeneratorEditor
         asset.nombre = $"{clan}_{id}";
         asset.clan = clan;
         asset.chatarraType = (TipoChatarra)Random.Range(0, 10);
-        asset.ranked = (RankedGriego)Random.Range(0, 10);
+        asset.ranked = (RankedGriego)Random.Range(1, 11);
 
         asset.VIDA = Random.Range(50f, 301f);
         asset.VELOCIDAD = Random.Range(2f, 7f);
