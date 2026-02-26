@@ -44,23 +44,6 @@ public enum TipoChatarra
 }
 
 /// <summary>
-/// Jerarquía de poder: 10=Omega, 9=Alpha, 8=Beta, 1-7=resto (Iota a Gamma).
-/// </summary>
-public enum RankedGriego
-{
-    Iota = 1,
-    Theta = 2,
-    Eta = 3,
-    Zeta = 4,
-    Epsilon = 5,
-    Delta = 6,
-    Gamma = 7,
-    Beta = 8,
-    Alpha = 9,
-    Omega = 10
-}
-
-/// <summary>
 /// Datos base de un ApocaMon. ScriptableObject configurable desde el Inspector.
 /// </summary>
 [CreateAssetMenu(fileName = "NuevoApocaMon", menuName = "ApocaMon/Datos ApocaMon")]

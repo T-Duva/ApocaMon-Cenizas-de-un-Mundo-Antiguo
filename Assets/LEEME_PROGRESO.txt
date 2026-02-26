@@ -1,10 +1,23 @@
 ESTADO DEL PROYECTO - CLASIFICACIÓN 3.2.7
 
-Cámara: Zoom automático (90° Ortho / 30° Persp). Posición inicial (0, 50, 0).
+Cámara: Zoom Lerp 90° (Ortho) / 30° (Persp). Posición inicial (0, 50, 0).
+Control: WASD o flechas (X/Z) + ruedita para zoom.
 
-Base de Datos: 180 ApocaData generados en Assets/ApocaDataFiles/.
+Base de Datos: 180 ApocaData en Assets/ApocaDataFiles/ (menú ApocaMon -> Generar 180 ApocaMon (Organizados)).
+Stats: VIDA (50-300), VELOCIDAD (2-7), ACELERACION (5-15), DAÑO (5-50), DEFENSA (0-25), RESISTENCIA (20-100), CADENCIA (0.5-3), ALCANCE (1.5-12).
 
-Regla de Oro Ranks: 10=Omega, 9=Alpha, 8=Beta.
+Tabla de Rangos Griegos (RankedGriego):
+  1 = Iota
+  2 = Theta
+  3 = Eta
+  4 = Zeta
+  5 = Epsilon
+  6 = Delta
+  7 = Gamma
+  8 = Beta
+  9 = Alpha
+ 10 = Omega
+Regla de Oro: 10=Omega, 9=Alpha, 8=Beta.
 
 Pendiente Próxima Sesión:
     - Test de profundidad con objeto 3D.
