@@ -1,0 +1,47 @@
+--- APOCAMON STATS SYSTEM v3.3.2 ---
+ESCALA GENERAL:
+
+Stats Base (all): Se tiran entre 1 y 6 al nacer (instanciación).
+
+Dado Extra (Vida only): Un dado (1-6) tirado UNA VEZ al nacer.
+
+Multiplicador de Rango (Rango): 1=Iota, 10=Omega (ver Jerarquía Griega).
+
+FÓRMULAS FINALES DE ADN (v3.3.2):
+Vida_Final = (Vida_Base * Dado_Extra_1-6) * Rango
+Daño_Final = Daño_Base * Rango
+Defensa_Final = Defensa_Base * Rango
+Resistencia_Final = Resistencia_Base * Rango
+
+Cadencia (Fijo): Cadencia_Base (No escala con Rango) Velocidad (Fijo): Velocidad_Base (No escala con Rango) Alcance (Fijo): Alcance_Base (No escala con Rango)
+LÓGICA DE PROGRAMACIÓN:
+
+Unidades de Mundo (Unidad 1:1): Se aplican a Velocidad, Alcance y Cadencia.
+
+Combate: Daño Final - Defensa Final = Daño a la Vida (Unidad 1:1).
+
+Resistencia: Es el costo de energía para atacar. Sin ella, no hay ataque.
+
+No destruir: Al llegar a 0 de vida, se llama a PasarAKO(). El bicho no desaparece.
+
+JERARQUÍA GRIEGA (MULTIPLICADOR X1 A X10):
+
+10: Omega (Máximo Poder)
+
+9: Alpha
+
+8: Beta
+
+7: Gamma
+
+6: Delta
+
+5: Epsilon
+
+4: Zeta
+
+3: Eta
+
+2: Theta
+
+1: Iota (Mínimo Poder)

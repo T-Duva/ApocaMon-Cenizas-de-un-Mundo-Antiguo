@@ -2,11 +2,10 @@ using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
-/// Defensa colocable en el Mazing TD. Bloquea el paso de enemigos (NavMesh Obstacle con Carve).
-/// Al nacer lee Mutante_Prueba y se pinta del clan elegido por el jugador. Clic derecho para quitar/reordenar.
-/// Requiere un Collider2D o Collider en el objeto para detectar el clic y para el obstáculo.
+/// Defensa 3D: NavMeshObstacle con Carve. Clic derecho (raycast 3D) para quitar. Requiere BoxCollider (3D).
 /// </summary>
 [RequireComponent(typeof(NavMeshObstacle))]
+[RequireComponent(typeof(BoxCollider))]
 public class ApocaMonDefensa : MonoBehaviour
 {
     private const int TamanioPool = 10;
@@ -18,9 +17,9 @@ public class ApocaMonDefensa : MonoBehaviour
     [Header("Pool de 10 clanes/colores (mismo orden que en Desfile para coincidir)")]
     [SerializeField] private ClanYColorDefensa[] poolClanes = new ClanYColorDefensa[TamanioPool];
 
-    [Header("Visual")]
-    [Tooltip("Si está vacío, se usa el SpriteRenderer de este objeto o de un hijo.")]
+    [Header("Visual (SpriteRenderer o MeshRenderer para color clan)")]
     [SerializeField] private SpriteRenderer visual;
+    [SerializeField] private MeshRenderer visual3D;
 
     private NavMeshObstacle obstaculo;
 
@@ -39,10 +38,8 @@ public class ApocaMonDefensa : MonoBehaviour
             obstaculo.carving = true;
         }
 
-        if (visual == null)
-            visual = GetComponent<SpriteRenderer>();
-        if (visual == null)
-            visual = GetComponentInChildren<SpriteRenderer>(true);
+        if (visual == null) visual = GetComponentInChildren<SpriteRenderer>(true);
+        if (visual3D == null) visual3D = GetComponentInChildren<MeshRenderer>(true);
     }
 
     private void Start()
@@ -63,33 +60,24 @@ public class ApocaMonDefensa : MonoBehaviour
         {
             if (poolClanes[i].clan == clanElegido)
             {
-                if (visual != null)
-                    visual.color = poolClanes[i].colorVisual;
+                Color c = poolClanes[i].colorVisual;
+                if (visual != null) visual.color = c;
+                if (visual3D != null && visual3D.material != null) visual3D.material.color = c;
                 return;
             }
         }
 
-        if (visual != null)
-            visual.color = Color.white;
+        if (visual != null) visual.color = Color.white;
+        if (visual3D != null && visual3D.material != null) visual3D.material.color = Color.white;
     }
 
     private void Update()
     {
-        if (!Input.GetMouseButtonDown(1))
+        if (!Input.GetMouseButtonDown(1) || Camera.main == null)
             return;
-
-        Vector2 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.zero);
-        if (hit.collider != null && hit.collider.gameObject == gameObject)
-        {
-            gameObject.SetActive(false);
-            return;
-        }
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit3D) && hit3D.collider.gameObject == gameObject)
-        {
+        if (Physics.Raycast(ray, out RaycastHit hit) && hit.collider != null && hit.collider.gameObject == gameObject)
             gameObject.SetActive(false);
-        }
     }
 }

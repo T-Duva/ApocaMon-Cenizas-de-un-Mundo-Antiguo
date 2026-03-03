@@ -19,6 +19,8 @@ Tabla de Rangos Griegos (RankedGriego):
  10 = Omega
 Regla de Oro: 10=Omega, 9=Alpha, 8=Beta.
 
+Renderizado 3D: En Assets/Settings/UniversalRP.asset, asegurarse de usar un Forward Renderer (Universal Renderer) para 3D. Si solo está Renderer2D, agregar desde el menú URP (Right-click > Create > Rendering > URP Renderer) y asignarlo como default.
+
 Pendiente Próxima Sesión:
     - Test de profundidad con objeto 3D.
     - Asignación de ADN al ApocaMotor en escena.

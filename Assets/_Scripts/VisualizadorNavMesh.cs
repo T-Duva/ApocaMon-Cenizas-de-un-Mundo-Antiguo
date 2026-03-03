@@ -7,12 +7,12 @@ using UnityEditor;
 
 /// <summary>
 /// Se asegura de que el NavMeshSurface tenga la visibilidad activada (overlay / datos listos para ver el azul en Scene).
-/// Poné este script en el mismo GameObject que tiene NavMeshSurface (ej. Suelo) o en la cámara.
+/// En 3D el objeto con NavMeshSurface es PISO_NAVMESH_UNICO.
 /// </summary>
 public class VisualizadorNavMesh : MonoBehaviour
 {
-    [Tooltip("Si está vacío, usa 'Suelo'. El objeto con NavMeshSurface.")]
-    public string nombreObjetoConSurface = "Suelo";
+    [Tooltip("Objeto con NavMeshSurface (3D: PISO_NAVMESH_UNICO).")]
+    public string nombreObjetoConSurface = "PISO_NAVMESH_UNICO";
 
 #if UNITY_EDITOR
     void OnEnable()
@@ -28,7 +28,7 @@ public class VisualizadorNavMesh : MonoBehaviour
     void AsegurarVisibilidadEnEditor()
     {
         if (!Application.isPlaying && string.IsNullOrEmpty(nombreObjetoConSurface))
-            nombreObjetoConSurface = "Suelo";
+            nombreObjetoConSurface = "PISO_NAVMESH_UNICO";
 
         GameObject go = GameObject.Find(nombreObjetoConSurface);
         if (go == null) return;

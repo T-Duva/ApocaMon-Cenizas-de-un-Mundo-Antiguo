@@ -21,8 +21,8 @@ public static class DiagnosticoMundo
         else
             Debug.LogWarning("📷 Cámara: No se encontró ninguna cámara en la escena.");
 
-        // 2. Objetos críticos: componentes de Suelo y Enemigos_Zona_Toxica
-        ReportarObjeto("Suelo", GameObject.Find("Suelo"));
+        // 2. Objetos críticos: SUELO_DEFINITIVO (3D) y Enemigos_Zona_Toxica
+        ReportarObjeto("SUELO_DEFINITIVO", GameObject.Find("SUELO_DEFINITIVO"));
         ReportarObjeto("Enemigos_Zona_Toxica", GameObject.Find("Enemigos_Zona_Toxica"));
 
         // Si Enemigos_Zona_Toxica no está en escena, reportar el prefab
@@ -58,13 +58,13 @@ public static class DiagnosticoMundo
         // 4. Z-Axis: resumen de posiciones Z
         Debug.Log("<color=white>── Z-Axis (resumen) ──</color>");
         ReportarZ("Cámara", cam?.transform);
-        ReportarZ("Suelo", GameObject.Find("Suelo")?.transform);
+        ReportarZ("SUELO_DEFINITIVO", GameObject.Find("SUELO_DEFINITIVO")?.transform);
         ReportarZ("Enemigos_Zona_Toxica (escena)", GameObject.Find("Enemigos_Zona_Toxica")?.transform);
         if (surface != null)
             ReportarZ("NavMeshSurface (" + surface.gameObject.name + ")", surface.transform);
 
         // Advertencia si suelo y bicho tienen Z muy distintos
-        Transform tSuelo = GameObject.Find("Suelo")?.transform;
+        Transform tSuelo = GameObject.Find("SUELO_DEFINITIVO")?.transform;
         Transform tBicho = GameObject.Find("Enemigos_Zona_Toxica")?.transform;
         float zNav = surface != null ? surface.transform.position.z : 0f;
         if (tBicho != null && surface != null)
@@ -94,9 +94,10 @@ public static class DiagnosticoMundo
         if (go == null) return;
         bool tieneSprite = go.GetComponent<SpriteRenderer>() != null;
         bool tieneMesh = go.GetComponent<MeshRenderer>() != null;
+        bool tieneMeshCollider = go.GetComponent<MeshCollider>() != null;
         bool tieneBox3D = go.GetComponent<BoxCollider>() != null;
         bool tieneBox2D = go.GetComponent<BoxCollider2D>() != null;
-        Debug.Log($"  SpriteRenderer: {(tieneSprite ? "Sí" : "No")} | MeshRenderer: {(tieneMesh ? "Sí" : "No")} | BoxCollider: {(tieneBox3D ? "Sí" : "No")} | BoxCollider2D: {(tieneBox2D ? "Sí" : "No")}");
+        Debug.Log($"  SpriteRenderer: {(tieneSprite ? "Sí" : "No")} | MeshRenderer: {(tieneMesh ? "Sí" : "No")} | MeshCollider: {(tieneMeshCollider ? "Sí" : "No")} | BoxCollider: {(tieneBox3D ? "Sí" : "No")} | BoxCollider2D: {(tieneBox2D ? "Sí" : "No")}");
     }
 
     static void ReportarZ(string etiqueta, Transform t)
