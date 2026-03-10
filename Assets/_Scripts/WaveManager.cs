@@ -3,6 +3,7 @@ using UnityEngine.AI;
 using UnityEngine.Rendering;
 using System.Collections;
 
+// V. 3.2.10 - Implementación 3D funcional con Draco FBX
 public class WaveManager : MonoBehaviour
 {
     [Header("--- REFERENCIAS ---")]
@@ -68,9 +69,8 @@ public class WaveManager : MonoBehaviour
             if (NavMesh.SamplePosition(spawnerTransform.position, out hit, radioDeBusqueda, NavMesh.AllAreas))
             {
                 go.transform.position = hit.position;
-                agent.enabled = true; // Lo prendemos ya en el suelo
-                bool success = agent.Warp(hit.position); // Forzamos el anclaje
-                Debug.Log($"<color=cyan>📦 LOG: Enemigo posicionado. Warp: {success}</color>");
+                agent.enabled = true;
+                agent.Warp(hit.position);
             }
             else
             {

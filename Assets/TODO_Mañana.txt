@@ -1,0 +1,1 @@
+AJUSTE PENDIENTE: Cambiar la calidad de evasión del NavMesh. Actualmente los dragones esquivan en diagonal desde muy lejos. Mañana queremos que vayan derecho y solo esquiven al contacto con la torre (Jugador_Batalla).

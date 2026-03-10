@@ -2,60 +2,56 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 
+/// <summary>
+/// Destino: "Meta". 3D, High Quality avoidance. Si velocidad ~0 por 0.5s, ResetPath y recalcula hacia Meta.
+/// </summary>
 public class IAEnemigo : MonoBehaviour
 {
     private NavMeshAgent agent;
-    private SpriteRenderer sprite;
+    private Transform meta;
+    private float tiempoVelocidadCero;
 
-    [Header("--- TUS REFERENCIAS (Segundos) ---")]
+    [Header("Velocidad 3D")]
     public float Velocidad_FINAL = 2.0f;
     public float Aceleracion_FINAL = 0.1f;
-
-    [Header("--- VALORES CALCULADOS ---")]
-    public float velocidadCalculada;
-    public float aceleracionCalculada;
 
     IEnumerator Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        sprite = GetComponent<SpriteRenderer>();
-
-        // Forzamos límites altos para que el motor no nos frene
-        if (agent != null)
-        {
-            agent.speed = 999f;
-            agent.acceleration = 999f;
-            agent.updateRotation = false;
-            agent.updateUpAxis = false;
-        }
+        if (agent == null) yield break;
 
         GameObject metaObj = null;
         while (metaObj == null)
         {
             metaObj = GameObject.Find("Meta");
-            yield return null; // Espera al siguiente frame
+            yield return null;
         }
+        meta = metaObj.transform;
 
-        float distancia = Vector3.Distance(transform.position, metaObj.transform.position);
+        if (!agent.isOnNavMesh) yield break;
 
-        // CÁLCULO REAL
-        velocidadCalculada = distancia / Mathf.Max(0.1f, Velocidad_FINAL);
-        aceleracionCalculada = velocidadCalculada / Mathf.Max(0.01f, Aceleracion_FINAL);
-
-        // APLICACIÓN REAL
-        if (agent != null && agent.isOnNavMesh)
-        {
-            agent.speed = velocidadCalculada;
-            agent.acceleration = aceleracionCalculada;
-            agent.SetDestination(metaObj.transform.position);
-
-            // Log para que veas en consola si el número es coherente
-            Debug.Log($"<color=cyan>⚡ TURBO: Distancia {distancia:F1}m. Velocidad seteada: {velocidadCalculada:F1} unidades/seg</color>");
-        }
+        agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+        agent.autoRepath = true;
+        float distancia = Vector3.Distance(transform.position, meta.position);
+        agent.speed = distancia / Mathf.Max(0.1f, Velocidad_FINAL);
+        agent.acceleration = agent.speed / Mathf.Max(0.01f, Aceleracion_FINAL);
+        agent.SetDestination(meta.position);
     }
 
-    void LateUpdate()
+    void Update()
     {
-        transform.position = new Vector3(transform.position.x, transform.position.y, -1f);
+        if (agent == null || !agent.isOnNavMesh || meta == null) return;
+        if (agent.velocity.sqrMagnitude < 0.01f)
+        {
+            tiempoVelocidadCero += Time.deltaTime;
+            if (tiempoVelocidadCero >= 0.5f)
+            {
+                agent.ResetPath();
+                agent.SetDestination(meta.position);
+                tiempoVelocidadCero = 0f;
+            }
+        }
+        else
+            tiempoVelocidadCero = 0f;
     }
 }

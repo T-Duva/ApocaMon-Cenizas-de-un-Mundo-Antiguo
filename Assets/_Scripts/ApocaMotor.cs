@@ -41,14 +41,33 @@ public class ApocaMotor : MonoBehaviour
 
         if (agent != null && agent.isOnNavMesh)
         {
+            agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
             agent.speed = apocaData.VELOCIDAD;
             agent.acceleration = apocaData.VELOCIDAD;
-            agent.SetDestination(Vector3.zero);
+            agent.autoRepath = true;
+            GameObject meta = GameObject.Find("Meta");
+            if (meta != null)
+                agent.SetDestination(meta.transform.position);
+            else
+                agent.SetDestination(Vector3.zero);
         }
     }
 
     /// <summary>
-    /// Recibe daño. Si la vida llega a 0, llama a PasarAKO() (no Destroy).
+    /// Fórmula: Daño Final = max(0, dañoBase - defensaObjetivo). Se resta de la vida.
+    /// Daño Base y Defensa del Objetivo en escala 1-6 (dados).
+    /// </summary>
+    public void RecibirDanoCalculado(int dañoBase1a6, int defensaObjetivo1a6)
+    {
+        if (estado == EstadoApoca.KO) return;
+        int dañoFinal = Mathf.Max(0, dañoBase1a6 - defensaObjetivo1a6);
+        vidaActual = Mathf.Max(0f, vidaActual - dañoFinal);
+        if (vidaActual <= 0f)
+            PasarAKO();
+    }
+
+    /// <summary>
+    /// Recibe daño ya calculado (Daño Final). Si la vida llega a 0, llama a PasarAKO() (no Destroy).
     /// </summary>
     public void RecibirDano(float cantidad)
     {

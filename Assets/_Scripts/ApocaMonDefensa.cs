@@ -2,10 +2,8 @@ using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
-/// Defensa 3D: NavMeshObstacle con Carve. Clic derecho (raycast 3D) para quitar. Requiere BoxCollider (3D).
+/// Jugador/Defensa: solo asegura NavMeshObstacle.carving = true (el obstáculo se añade manualmente). Clic derecho para quitar.
 /// </summary>
-[RequireComponent(typeof(NavMeshObstacle))]
-[RequireComponent(typeof(BoxCollider))]
 public class ApocaMonDefensa : MonoBehaviour
 {
     private const int TamanioPool = 10;
@@ -34,9 +32,7 @@ public class ApocaMonDefensa : MonoBehaviour
     {
         obstaculo = GetComponent<NavMeshObstacle>();
         if (obstaculo != null)
-        {
             obstaculo.carving = true;
-        }
 
         if (visual == null) visual = GetComponentInChildren<SpriteRenderer>(true);
         if (visual3D == null) visual3D = GetComponentInChildren<MeshRenderer>(true);
