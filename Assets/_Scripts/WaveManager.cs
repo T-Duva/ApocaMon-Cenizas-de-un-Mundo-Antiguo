@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Rendering;
 using System.Collections;
 
 public class WaveManager : MonoBehaviour
@@ -13,8 +14,13 @@ public class WaveManager : MonoBehaviour
     public float cadenciaSpawn = 1.0f;
     public float radioDeBusqueda = 20f;
 
+    private CicloDiaNoche cicloDiaNoche;
+
     void Start()
     {
+        RenderSettings.ambientIntensity = 1.5f;
+        RenderSettings.ambientMode = AmbientMode.Skybox;
+        cicloDiaNoche = Object.FindFirstObjectByType<CicloDiaNoche>(FindObjectsInactive.Include);
         if (spawnerTransform == null) Debug.LogError("❌ LOG: SpawnerTransform no asignado en _GameManager.");
         StartCoroutine(SpawnSequence());
     }
@@ -23,13 +29,26 @@ public class WaveManager : MonoBehaviour
     {
         while (true)
         {
+            if (cicloDiaNoche != null) cicloDiaNoche.AlEmpezarOleada();
+
             for (int i = 0; i < cantidadPorOleada; i++)
             {
                 SpawnIndividual();
                 yield return new WaitForSeconds(cadenciaSpawn);
             }
+
+            yield return new WaitUntil(TodosLosEnemigosMurieron);
+            if (cicloDiaNoche != null) cicloDiaNoche.AlTerminarOleada();
             yield return new WaitForSeconds(5f);
         }
+    }
+
+    bool TodosLosEnemigosMurieron()
+    {
+        var motores = Object.FindObjectsByType<ApocaMotor>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var m in motores)
+            if (m != null && m.Estado == ApocaMotor.EstadoApoca.Activo) return false;
+        return true;
     }
 
     void SpawnIndividual()

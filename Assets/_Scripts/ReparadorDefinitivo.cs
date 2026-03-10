@@ -160,9 +160,7 @@ public class ReparadorDefinitivo : MonoBehaviour
         {
             cam.transform.position = new Vector3(0f, 50f, -30f);
             cam.transform.LookAt(Vector3.zero);
-            cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(0.1f, 0.1f, 0.12f);
-            Debug.Log("[Cámara] Main Camera apuntando a (0,0,0). Vista Tower Defense 3D.");
+            Debug.Log("[Cámara] Main Camera apuntando a (0,0,0). Vista Tower Defense 3D. Luces y cielo se configuran desde Window > Rendering > Lighting.");
         }
 
         ResetearPastoWarcraft();
