@@ -57,7 +57,7 @@ public class WaveManager : MonoBehaviour
         if (enemigoPrefab == null) return;
 
         // 1. Instanciamos el bicho
-        GameObject go = Instantiate(enemigoPrefab, spawnerTransform.position, Quaternion.identity);
+        GameObject go = Instantiate(enemigoPrefab, spawnerTransform.position, spawnerTransform.rotation);
         NavMeshAgent agent = go.GetComponent<NavMeshAgent>();
 
         if (agent != null)
