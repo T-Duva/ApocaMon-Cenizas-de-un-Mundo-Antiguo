@@ -3,26 +3,26 @@ using UnityEngine.AI;
 using UnityEngine.Rendering;
 using System.Collections;
 
-// V. 3.2.10 - Implementación 3D funcional con Draco FBX
 public class WaveManager : MonoBehaviour
 {
     [Header("--- REFERENCIAS ---")]
     public GameObject enemigoPrefab;
     public Transform spawnerTransform;
+    public Transform metaTransform;
 
-    [Header("--- AJUSTES MODULARES ---")]
+    [Header("--- AJUSTES OLEADA ---")]
     public int cantidadPorOleada = 10;
     public float cadenciaSpawn = 1.0f;
     public float radioDeBusqueda = 20f;
 
     private CicloDiaNoche cicloDiaNoche;
+    private ZonaToxicaNocturna zonaToxica;
 
     void Start()
     {
-        RenderSettings.ambientIntensity = 1.5f;
-        RenderSettings.ambientMode = AmbientMode.Skybox;
         cicloDiaNoche = Object.FindFirstObjectByType<CicloDiaNoche>(FindObjectsInactive.Include);
-        if (spawnerTransform == null) Debug.LogError("❌ LOG: SpawnerTransform no asignado en _GameManager.");
+        zonaToxica = Object.FindFirstObjectByType<ZonaToxicaNocturna>(FindObjectsInactive.Include);
+
         StartCoroutine(SpawnSequence());
     }
 
@@ -30,6 +30,18 @@ public class WaveManager : MonoBehaviour
     {
         while (true)
         {
+            // Verificación de noche (1% de probabilidad según Zona Tóxica)
+            if (cicloDiaNoche != null && cicloDiaNoche.esDeNoche)
+            {
+                if (zonaToxica != null && !zonaToxica.PuedeAparecerOleada())
+                {
+                    // Pequeñísima espera de 0.5s solo para no saturar el procesador en el bucle
+                    yield return new WaitForSeconds(0.5f);
+                    continue;
+                }
+            }
+
+            // --- INICIO DE OLEADA ---
             if (cicloDiaNoche != null) cicloDiaNoche.AlEmpezarOleada();
 
             for (int i = 0; i < cantidadPorOleada; i++)
@@ -38,44 +50,43 @@ public class WaveManager : MonoBehaviour
                 yield return new WaitForSeconds(cadenciaSpawn);
             }
 
+            // Esperar a que todos los motores pasen a KO
             yield return new WaitUntil(TodosLosEnemigosMurieron);
-            if (cicloDiaNoche != null) cicloDiaNoche.AlTerminarOleada();
-            yield return new WaitForSeconds(5f);
-        }
-    }
 
-    bool TodosLosEnemigosMurieron()
-    {
-        var motores = Object.FindObjectsByType<ApocaMotor>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        foreach (var m in motores)
-            if (m != null && m.Estado == ApocaMotor.EstadoApoca.Activo) return false;
-        return true;
+            if (cicloDiaNoche != null) cicloDiaNoche.AlTerminarOleada();
+
+            // Sin pausas. El bucle vuelve arriba al instante.
+        }
     }
 
     void SpawnIndividual()
     {
-        if (enemigoPrefab == null) return;
+        if (enemigoPrefab == null || spawnerTransform == null) return;
 
-        // 1. Instanciamos el bicho
         GameObject go = Instantiate(enemigoPrefab, spawnerTransform.position, spawnerTransform.rotation);
         NavMeshAgent agent = go.GetComponent<NavMeshAgent>();
 
         if (agent != null)
         {
-            agent.enabled = false; // Lo apagamos un segundo para moverlo
-
+            agent.enabled = false;
             NavMeshHit hit;
-            // Buscamos el punto azul más cercano (radio: radioDeBusqueda)
             if (NavMesh.SamplePosition(spawnerTransform.position, out hit, radioDeBusqueda, NavMesh.AllAreas))
             {
                 go.transform.position = hit.position;
                 agent.enabled = true;
-                agent.Warp(hit.position);
-            }
-            else
-            {
-                Debug.LogError("❌ LOG: No se encontró NavMesh cerca del Spawner.");
+                if (metaTransform != null) agent.SetDestination(metaTransform.position);
             }
         }
+    }
+
+    // Tu lógica original de ApocaMotor
+    bool TodosLosEnemigosMurieron()
+    {
+        var motores = Object.FindObjectsByType<ApocaMotor>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var m in motores)
+        {
+            if (m != null && m.Estado == ApocaMotor.EstadoApoca.Activo) return false;
+        }
+        return true;
     }
 }

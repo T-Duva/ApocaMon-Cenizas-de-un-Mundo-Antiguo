@@ -71,8 +71,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b81a1e4f2c8d4e64a9f3b5c7d1e8a0c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Velocidad_FINAL: 4
-  Aceleracion_FINAL: 2
+  Velocidad_FINAL: 1
+  Aceleracion_FINAL: 1
 --- !u!65 &778714589632665210
 BoxCollider:
   m_ObjectHideFlags: 0
