@@ -3,90 +3,132 @@ using System.Collections;
 
 public class CicloDiaNoche : MonoBehaviour
 {
-    [Header("Configuración de Probabilidad")]
-    public float probabilidadAcumulada = 5f;
+    [Header("Estado Actual")]
     public bool esDeNoche = false;
+    public float temporizador = 0f;
 
-    [Header("Referencias de Luces")]
-    public Transform solTransform; // EL PADRE (sol:principal)
+    [Header("Configuración (Segundos)")]
+    public float duracionDia = 120f;
+    public float duracionNoche = 30f;
+    public float arcoTotal = 180f;
+
+    [Header("Unión Invisible y Aceleración")]
+    [Tooltip("La velocidad mínima a la que se unen el día y la noche (tu '10 km/h').")]
+    public float velocidadMinimaUnion = 0.3f;
+
+    [Tooltip("Nivel 1 = Aceleración normal (10,20,30). Nivel 2 = Arranque lento (10,12,14,20). Nivel 3 o 4 = Arranque súper lento.")]
+    [Range(1, 4)]
+    public int lentitudArranque = 2; // <- ACÁ ESTÁ LA MAGIA QUE PEDISTE
+
+    [Header("Referencias")]
+    public Transform solTransform;
     public Light solLight;
     public Light lunaLight;
 
-    [Header("Ajuste de Movimiento")]
-    public float arcoTotal = 180f;
-    public float velocidadTransicion = 2f;
-    public float timerNoche = 60f;
-
-    private bool oleadaActiva = false;
-    private float anguloInicialX;
-    private float anguloInicialY;
+    private float gradosRecorridos = 0f;
+    private float intensidadOriginalSol;
 
     void Start()
     {
-        if (solTransform != null)
+        if (solLight != null)
         {
-            // Guardamos tu rotación de Unity
-            anguloInicialX = solTransform.eulerAngles.x;
-            anguloInicialY = solTransform.eulerAngles.y;
+            intensidadOriginalSol = solLight.intensity;
+            solLight.enabled = true;
         }
         if (lunaLight != null) lunaLight.enabled = false;
+
+        temporizador = 0f;
+        gradosRecorridos = 0f;
+        esDeNoche = false;
     }
 
     void Update()
     {
-        if (!esDeNoche && solTransform != null)
+        if (solTransform == null) return;
+
+        temporizador += Time.deltaTime;
+
+        float duracionActual = esDeNoche ? duracionNoche : duracionDia;
+        float tiempoMatematico = Mathf.Clamp(temporizador, 0f, duracionActual);
+
+        // 1. Calculamos el tiempo de 0 a 1
+        float t = tiempoMatematico / duracionActual;
+
+        // 2. LA MAGIA DEL ACHATAMIENTO: 
+        // Mientras más alto el factor 'lentitudArranque', más tiempo se queda en 10, 12, 14...
+        float curva = t;
+        for (int i = 0; i < lentitudArranque; i++)
         {
-            // BARRIDO HORIZONTAL
-            float sweepY = arcoTotal * (probabilidadAcumulada / 100f);
-            Quaternion targetRot = Quaternion.Euler(anguloInicialX, anguloInicialY + sweepY, 0f);
-            solTransform.rotation = Quaternion.Lerp(solTransform.rotation, targetRot, Time.deltaTime * velocidadTransicion);
+            curva = Mathf.SmoothStep(0f, 1f, curva);
         }
 
-        if (esDeNoche && !oleadaActiva)
+        // 3. Calculamos el giro exacto garantizando los 180 grados y la velocidad mínima
+        float progresoCalculado = (velocidadMinimaUnion * tiempoMatematico) +
+                                  (arcoTotal - (velocidadMinimaUnion * duracionActual)) * curva;
+
+        float deltaGiro = progresoCalculado - gradosRecorridos;
+        solTransform.Rotate(0f, 0f, deltaGiro, Space.Self);
+
+        gradosRecorridos = progresoCalculado;
+
+        if (temporizador >= duracionActual)
         {
-            timerNoche -= Time.deltaTime;
-            if (timerNoche <= 0) TerminarNoche();
+            if (!esDeNoche) EmpezarNoche();
+            else TerminarNoche();
         }
     }
 
-    public void AlTerminarOleada()
+    [ContextMenu("Probar: Forzar Noche")]
+    public void EmpezarNoche()
     {
-        oleadaActiva = false;
         if (esDeNoche) return;
 
-        if (Random.Range(0f, 100f) <= probabilidadAcumulada || probabilidadAcumulada >= 100f)
-            EmpezarNoche();
-        else
-            probabilidadAcumulada += 5f;
-    }
-
-    public void AlEmpezarOleada() => oleadaActiva = true;
-
-    void EmpezarNoche()
-    {
         esDeNoche = true;
-        timerNoche = 60f;
+        temporizador = 0f;
+        gradosRecorridos = 0f;
+
         if (solLight != null) StartCoroutine(FadeOutLight(solLight));
         if (lunaLight != null) lunaLight.enabled = true;
     }
 
-    void TerminarNoche()
+    [ContextMenu("Probar: Terminar Noche")]
+    public void TerminarNoche()
     {
+        if (!esDeNoche) return;
+
         esDeNoche = false;
-        probabilidadAcumulada = 5f;
-        if (solLight != null) solLight.enabled = true;
+        temporizador = 0f;
+        gradosRecorridos = 0f;
+
+        if (solLight != null) StartCoroutine(FadeInLight(solLight, intensidadOriginalSol));
         if (lunaLight != null) lunaLight.enabled = false;
     }
+
+    // --- MÉTODOS REQUERIDOS POR WAVEMANAGER ---
+    public void AlEmpezarOleada() { }
+    public void AlTerminarOleada() { }
 
     IEnumerator FadeOutLight(Light lightToFade)
     {
         float startIntensity = lightToFade.intensity;
-        while (lightToFade.intensity > 0)
+        while (lightToFade.intensity > 0.05f)
         {
             lightToFade.intensity -= startIntensity * Time.deltaTime;
             yield return null;
         }
         lightToFade.enabled = false;
-        lightToFade.intensity = startIntensity;
+    }
+
+    IEnumerator FadeInLight(Light lightToFade, float targetIntensity)
+    {
+        lightToFade.intensity = 0f;
+        lightToFade.enabled = true;
+
+        while (lightToFade.intensity < targetIntensity)
+        {
+            lightToFade.intensity += targetIntensity * Time.deltaTime;
+            yield return null;
+        }
+        lightToFade.intensity = targetIntensity;
     }
 }
